@@ -1,0 +1,31 @@
+@import play.filters.csrf.CSRF.Token
+@(accountForm: Form[NewAccount])(implicit messages: Messages, request: RequestHeader)
+
+@main("Register") {
+    <h2>Register for this thing</h2>
+
+    @if(accountForm.hasErrors) {
+        @if(accountForm.errors.size > 0) {
+            @for(err <- accountForm.errors) {
+                @for(msg <- err.messages) {
+                    @msg
+                }
+            }
+        }
+    }
+
+    @helper.form(action = routes.Application.createAccount()) {
+        @helper.CSRF.formField
+
+        <label for="email">Email</label>
+        <input type="email" name="email" />
+
+        <label for="password">Password</label>
+        <input type="password" name="password" />
+
+        <label for="confirmPassword">Confirm Password</label>
+        <input type="password" name="confirmPassword" />
+
+        <button type="submit">Create</button>
+    }
+}

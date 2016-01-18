@@ -1,0 +1,10 @@
+New log file opened at Sat Jan 16 16:02:18 EST 2016 by 17105@Kyles-MacBook-Pro.local
+Taking next connection to: 58428
+New client attempting to connect on port: 58429-58428
+  Address = /192.168.1.6:58428
+This client on port 58429 has uuid a784538c-06b5-4970-bcec-f8716668b727 configName play-fork-run humanReadableName Play Fork Run protocolVersion 1 featureTags Vector()
+Connected Clients: play-fork-run-a784538c-06b5-4970-bcec-f8716668b727
+Taking next connection to: 58428
+Checking to see if clients are empty...
+We have 1 non-daemon clients, continuing serving connections.
+Taking next connection to: 58428
