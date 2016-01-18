@@ -30,7 +30,7 @@ class ApplicationSpec extends Specification {
       contentType(home) must beSome.which(_ == "text/html")
       contentAsString(home) must contain ("email")
       contentAsString(home) must contain ("password")
-      //contentAsString(home) must contain ("confirmPassword")
+      contentAsString(home) must contain ("confirmPassword")
     }
 
     "return error when passwords don't match" in new WithApplication{

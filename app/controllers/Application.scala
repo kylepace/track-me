@@ -1,15 +1,15 @@
 package controllers
 
-import javax.inject.Inject
-
+import jp.t2v.lab.play2.auth.{AuthElement, LoginLogout}
 import play.api.data.Forms._
 import play.api.data._
-import play.api.i18n.{I18nSupport, MessagesApi}
 import play.api.mvc._
+import play.api.libs.concurrent.Execution.Implicits._
+import scala.concurrent.Future
 
 case class NewAccount(email: String, password: String, confirmPassword: String)
 
-class Application @Inject()(val messagesApi: MessagesApi) extends Controller with I18nSupport {
+class Application extends Controller with AuthElement with LoginLogout with AuthConfigImpl {
 
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
@@ -28,13 +28,11 @@ class Application @Inject()(val messagesApi: MessagesApi) extends Controller wit
     Ok(views.html.register(accountForm))
   }
 
-  def createAccount = Action { implicit request =>
+  def createAccount = Action.async { implicit request =>
     accountForm.bindFromRequest.fold(
-      badForm => {
-        BadRequest(views.html.register(badForm))
-      },
-      success => {
-        Redirect(routes.Application.index())
+      badForm => Future.successful(BadRequest(views.html.register(badForm))),
+      newAccount => {
+        gotoLoginSucceeded(LoggedInAccount(newAccount.email, Administrator))
       }
     )
   }
