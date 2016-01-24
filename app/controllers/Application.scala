@@ -6,6 +6,7 @@ import play.api.data._
 import play.api.mvc._
 import play.api.libs.concurrent.Execution.Implicits._
 import scala.concurrent.Future
+import models._
 
 case class NewAccount(email: String, password: String, confirmPassword: String)
 
@@ -28,11 +29,11 @@ class Application extends Controller with OptionalAuthElement with LoginLogout w
     Ok(views.html.register(accountForm))
   }
 
-  def createAccount = AsyncStack { implicit request =>
-    implicit val user = loggedIn.getOrElse(null)
+  def createAccount = Action.async { implicit request =>
     accountForm.bindFromRequest.fold(
       badForm => Future.successful(BadRequest(views.html.register(badForm))),
       newAccount => {
+        Accounts.create(newAccount.email, newAccount.password)
         gotoLoginSucceeded(LoggedInAccount(newAccount.email, Administrator))
       }
     )
