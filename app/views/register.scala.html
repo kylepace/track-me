@@ -13,7 +13,7 @@
         }
     }
 
-    @helper.form(action = routes.Application.createAccount()) {
+    @helper.form(action = routes.Account.createPost()) {
         @helper.CSRF.formField
 
         <label for="email">Email</label>

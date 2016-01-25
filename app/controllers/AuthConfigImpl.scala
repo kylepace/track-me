@@ -27,13 +27,13 @@ trait AuthConfigImpl extends AuthConfig {
   def resolveUser(id: Id)(implicit ctx: ExecutionContext) = Future.successful(Some(id))
 
   def loginSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext) =
-    Future.successful(Redirect(routes.Application.index))
+    Future.successful(Redirect(routes.Home.index))
 
   def logoutSucceeded(request: RequestHeader)(implicit ctx: ExecutionContext) =
-    Future.successful(Redirect(routes.Application.index))
+    Future.successful(Redirect(routes.Home.index))
 
   def authenticationFailed(request: RequestHeader)(implicit ctx: ExecutionContext) =
-    Future.successful(Redirect(routes.Application.index))
+    Future.successful(Redirect(routes.Home.index))
 
   def authorize(user: User, authority: Authority)(implicit ctx: ExecutionContext): Future[Boolean] = Future.successful {
     (user.role, authority) match {

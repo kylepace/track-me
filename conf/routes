@@ -3,9 +3,9 @@
 # ~~~~
 
 
-GET     /                           controllers.Application.index
-GET     /register                   controllers.Application.register
-POST    /register                   controllers.Application.createAccount
+GET     /                           controllers.Home.index
+GET     /account/create             controllers.Account.create
+POST    /create                     controllers.Account.createPost
 
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)

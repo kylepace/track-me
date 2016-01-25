@@ -1,18 +1,19 @@
 package controllers
 
 import javax.inject.Inject
-import jp.t2v.lab.play2.auth.{OptionalAuthElement, LoginLogout}
+
+import jp.t2v.lab.play2.auth.{LoginLogout, OptionalAuthElement}
+import models.Accounts
+import play.api.data.Form
 import play.api.data.Forms._
-import play.api.data._
-import play.api.mvc._
-import play.api.libs.concurrent.Execution.Implicits._
+import play.api.mvc.{Action, Controller}
+
 import scala.concurrent.Future
-import models._
+import scala.concurrent.ExecutionContext.Implicits._
 
 case class NewAccount(email: String, password: String, confirmPassword: String)
 
-class Application @Inject() (accounts: Accounts) extends Controller with OptionalAuthElement with LoginLogout with AuthConfigImpl {
-
+class Account @Inject() (accounts: Accounts) extends Controller with OptionalAuthElement with LoginLogout with AuthConfigImpl  {
   val accountForm = Form(
     mapping(
       "email" -> email.verifying("Email already taken.", e => accounts.find(e) match {
@@ -25,15 +26,11 @@ class Application @Inject() (accounts: Accounts) extends Controller with Optiona
       verifying("Passwords must match.", a => a.password == a.confirmPassword)
   )
 
-  def index = Action {
-    Ok(views.html.index("Your new application is ready."))
-  }
-
-  def register = Action { implicit request =>
+  def create = Action { implicit request =>
     Ok(views.html.register(accountForm))
   }
 
-  def createAccount = Action.async { implicit request =>
+  def createPost = Action.async { implicit request =>
     accountForm.bindFromRequest.fold(
       badForm => Future.successful(BadRequest(views.html.register(badForm))),
       newAccount => {
