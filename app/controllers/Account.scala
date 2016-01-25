@@ -14,7 +14,7 @@ import scala.concurrent.ExecutionContext.Implicits._
 case class NewAccount(email: String, password: String, confirmPassword: String)
 
 class Account @Inject() (accounts: Accounts) extends Controller with OptionalAuthElement with LoginLogout with AuthConfigImpl  {
-  val accountForm = Form(
+  val createAccountForm = Form(
     mapping(
       "email" -> email.verifying("Email already taken.", e => accounts.find(e) match {
         case Some(_) => false
@@ -26,17 +26,32 @@ class Account @Inject() (accounts: Accounts) extends Controller with OptionalAut
       verifying("Passwords must match.", a => a.password == a.confirmPassword)
   )
 
+  val loginForm = Form(
+    tuple(
+      "email" -> email,
+      "password" -> nonEmptyText
+    )
+  )
+
   def create = Action { implicit request =>
-    Ok(views.html.register(accountForm))
+    Ok(views.html.register(createAccountForm))
   }
 
   def createPost = Action.async { implicit request =>
-    accountForm.bindFromRequest.fold(
+    createAccountForm.bindFromRequest.fold(
       badForm => Future.successful(BadRequest(views.html.register(badForm))),
       newAccount => {
         accounts.create(newAccount.email, newAccount.password)
         gotoLoginSucceeded(LoggedInAccount(newAccount.email, Administrator))
       }
     )
+  }
+
+  def login = Action { implicit req =>
+    Ok(views.html.login(loginForm))
+  }
+
+  def loginPost = Action { implicit req =>
+    Ok(views.html.login(loginForm))
   }
 }

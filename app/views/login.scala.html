@@ -1,0 +1,27 @@
+@(loginForm: Form[(String, String)])(implicit request: RequestHeader)
+
+@main("Login") {
+    <h2>Login</h2>
+
+    @if(loginForm.hasErrors) {
+        @if(loginForm.errors.size > 0) {
+            @for(err <- loginForm.errors) {
+                @for(msg <- err.messages) {
+                    @msg
+                }
+            }
+        }
+    }
+
+    @helper.form(action = routes.Account.loginPost()) {
+        @helper.CSRF.formField
+
+        <label for="email">Email</label>
+        <input type="email" name="email" />
+
+        <label for="password">Password</label>
+        <input type="password" name="password" />
+
+        <button type="submit">Create</button>
+    }
+}

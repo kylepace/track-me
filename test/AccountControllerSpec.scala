@@ -12,6 +12,17 @@ import scala.concurrent.duration._
 @RunWith(classOf[JUnitRunner])
 class AccountControllerSpec extends Specification {
 
+  "Login" should {
+    "render the login page" in new WithApplication {
+      val login = route(FakeRequest(GET, "/account/login")).get
+
+      status(login) must equalTo(OK)
+      contentType(login) must beSome.which(_ == "text/html")
+      contentAsString(login) must contain ("email")
+      contentAsString(login) must contain ("password")
+    }
+  }
+
   "Create Account" should {
     "render the create page" in new WithApplication {
       val home = route(FakeRequest(GET, "/account/create")).get
@@ -31,7 +42,7 @@ class AccountControllerSpec extends Specification {
           "confirmPassword" -> Seq("123")
         )
       )
-      val req = FakeRequest(POST, "/create")
+      val req = FakeRequest(POST, "/account/create")
         .withBody(reqBody)
         .withSession("csrfToken" -> CSRF.SignedTokenProvider.generateToken)
         .withHeaders(("X-Requested-With", CSRF.SignedTokenProvider.generateToken))
@@ -48,7 +59,7 @@ class AccountControllerSpec extends Specification {
           "confirmPassword" -> Seq("123456")
         )
       )
-      val req = FakeRequest(POST, "/create")
+      val req = FakeRequest(POST, "/account/create")
         .withBody(reqBody)
         .withSession("csrfToken" -> CSRF.SignedTokenProvider.generateToken)
         .withHeaders(("X-Requested-With", CSRF.SignedTokenProvider.generateToken))
@@ -69,7 +80,7 @@ class AccountControllerSpec extends Specification {
           "confirmPassword" -> Seq("123456")
         )
       )
-      val req = FakeRequest(POST, "/create")
+      val req = FakeRequest(POST, "/account/create")
         .withBody(reqBody)
         .withHeaders(("Csrf-Token", "nocheck"))
 
