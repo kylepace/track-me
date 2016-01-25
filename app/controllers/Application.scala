@@ -1,5 +1,6 @@
 package controllers
 
+import javax.inject.Inject
 import jp.t2v.lab.play2.auth.{OptionalAuthElement, LoginLogout}
 import play.api.data.Forms._
 import play.api.data._
@@ -10,20 +11,23 @@ import models._
 
 case class NewAccount(email: String, password: String, confirmPassword: String)
 
-class Application extends Controller with OptionalAuthElement with LoginLogout with AuthConfigImpl {
+class Application @Inject() (accounts: Accounts) extends Controller with OptionalAuthElement with LoginLogout with AuthConfigImpl {
+
+  val accountForm = Form(
+    mapping(
+      "email" -> email.verifying("Email already taken.", e => accounts.find(e) match {
+        case Some(_) => false
+        case None => true
+      }),
+      "password" -> nonEmptyText,
+      "confirmPassword" -> nonEmptyText
+    )(NewAccount.apply)(NewAccount.unapply)
+      verifying("Passwords must match.", a => a.password == a.confirmPassword)
+  )
 
   def index = Action {
     Ok(views.html.index("Your new application is ready."))
   }
-
-  val accountForm = Form(
-    mapping(
-      "email" -> email,
-      "password" -> nonEmptyText,
-      "confirmPassword" -> nonEmptyText
-    )(NewAccount.apply)(NewAccount.unapply)
-    verifying("Passwords must match.", a => a.password == a.confirmPassword)
-  )
 
   def register = Action { implicit request =>
     Ok(views.html.register(accountForm))
@@ -33,7 +37,7 @@ class Application extends Controller with OptionalAuthElement with LoginLogout w
     accountForm.bindFromRequest.fold(
       badForm => Future.successful(BadRequest(views.html.register(badForm))),
       newAccount => {
-        Accounts.create(newAccount.email, newAccount.password)
+        accounts.create(newAccount.email, newAccount.password)
         gotoLoginSucceeded(LoggedInAccount(newAccount.email, Administrator))
       }
     )

@@ -10,7 +10,7 @@ case class Account(id: Option[Long] = None, email: String, password: String){
   def encryptPassword = password.bcrypt
 }
 
-object Accounts {
+class Accounts {
   val accountParser = {
     long("id") ~
     str("email") ~
@@ -22,6 +22,7 @@ object Accounts {
   def create(email: String, password: String): Option[Account] = {
     val newAccount = Account(None, email, password)
     val encryptedPassword = newAccount.encryptPassword
+
     DB withConnection { implicit c =>
       val id: Option[Long] =
         SQL"INSERT INTO Account(email, password) VALUES ($email, ${encryptedPassword})"
