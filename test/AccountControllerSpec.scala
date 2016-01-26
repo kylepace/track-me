@@ -21,6 +21,82 @@ class AccountControllerSpec extends Specification {
       contentAsString(login) must contain ("email")
       contentAsString(login) must contain ("password")
     }
+
+    "return error when no account found" in new WithApplication {
+      val reqBody = AnyContentAsFormUrlEncoded(
+        Map(
+          "email" -> Seq("doesnotexist@email.com"),
+          "password" -> Seq("test")
+        )
+      )
+      val req = FakeRequest(POST, "/account/login")
+        .withBody(reqBody)
+        .withSession("csrfToken" -> CSRF.SignedTokenProvider.generateToken)
+        .withHeaders(("X-Requested-With", CSRF.SignedTokenProvider.generateToken))
+
+      val requestWithError = route(req).get
+      status(requestWithError) must equalTo(BAD_REQUEST)
+    }
+
+    "return error when password mismatches" in new WithApplication {
+      val reqBody = AnyContentAsFormUrlEncoded(
+        Map(
+          "email" -> Seq("testpasswordmismatch@email.com"),
+          "password" -> Seq("123456"),
+          "confirmPassword" -> Seq("123456")
+        )
+      )
+      val req = FakeRequest(POST, "/account/create")
+        .withBody(reqBody)
+        .withHeaders(("Csrf-Token", "nocheck"))
+
+      val createdAccount = route(req).get
+      status(createdAccount) must equalTo(SEE_OTHER)
+
+      val loginBody = AnyContentAsFormUrlEncoded(
+        Map(
+          "email" -> Seq("testpasswordmismatch@email.com"),
+          "password" -> Seq("test")
+        )
+      )
+      val loginReq = FakeRequest(POST, "/account/login")
+        .withBody(loginBody)
+        .withSession("csrfToken" -> CSRF.SignedTokenProvider.generateToken)
+        .withHeaders(("X-Requested-With", CSRF.SignedTokenProvider.generateToken))
+
+      val requestWithError = route(loginReq).get
+      status(requestWithError) must equalTo(BAD_REQUEST)
+    }
+
+    "redirects when login successful" in new WithApplication {
+      val reqBody = AnyContentAsFormUrlEncoded(
+        Map(
+          "email" -> Seq("testpasswordmatches@email.com"),
+          "password" -> Seq("123456"),
+          "confirmPassword" -> Seq("123456")
+        )
+      )
+      val req = FakeRequest(POST, "/account/create")
+        .withBody(reqBody)
+        .withHeaders(("Csrf-Token", "nocheck"))
+
+      val createdAccount = route(req).get
+      status(createdAccount) must equalTo(SEE_OTHER)
+
+      val loginBody = AnyContentAsFormUrlEncoded(
+        Map(
+          "email" -> Seq("testpasswordmatches@email.com"),
+          "password" -> Seq("123456")
+        )
+      )
+      val loginReq = FakeRequest(POST, "/account/login")
+        .withBody(loginBody)
+        .withSession("csrfToken" -> CSRF.SignedTokenProvider.generateToken)
+        .withHeaders(("X-Requested-With", CSRF.SignedTokenProvider.generateToken))
+
+      val redirectReq = route(loginReq).get
+      status(redirectReq) must equalTo(SEE_OTHER)
+    }
   }
 
   "Create Account" should {

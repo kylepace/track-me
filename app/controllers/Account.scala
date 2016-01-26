@@ -31,6 +31,10 @@ class Account @Inject() (accounts: Accounts) extends Controller with OptionalAut
       "email" -> email,
       "password" -> nonEmptyText
     )
+    verifying("Email or password don't match", t => accounts.find(t._1) match {
+      case Some(a) => a.passwordMatches(t._2)
+      case None => false
+    })
   )
 
   def create = Action { implicit request =>
@@ -51,7 +55,12 @@ class Account @Inject() (accounts: Accounts) extends Controller with OptionalAut
     Ok(views.html.login(loginForm))
   }
 
-  def loginPost = Action { implicit req =>
-    Ok(views.html.login(loginForm))
+  def loginPost = Action.async { implicit req =>
+    loginForm.bindFromRequest.fold(
+      badForm => Future.successful(BadRequest(views.html.login(badForm))),
+      login => {
+        gotoLoginSucceeded(LoggedInAccount(login._1, Administrator))
+      }
+    )
   }
 }
