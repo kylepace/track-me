@@ -12,6 +12,8 @@ CREATE TABLE Account (
 
 ALTER TABLE Account ADD CONSTRAINT UQ_Account_Email UNIQUE (email);
 
+INSERT INTO Account(email, password) VALUES('kyle@test.com', '$2a$10$Iw0veTcNrcfVLFJAcifk4eZpoJ0I3X5clebnHm.nSFT3GdqgF/v9K')
+
 # --- !Downs
 
 DROP TABLE Account;

@@ -25,7 +25,7 @@ class Account @Inject() (accounts: Accounts) extends Controller with OptionalAut
     )(NewAccount.apply)(NewAccount.unapply)
       verifying("Passwords must match.", a => a.password == a.confirmPassword)
   )
-
+  
   val loginForm = Form(
     tuple(
       "email" -> email,
