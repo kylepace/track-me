@@ -8,10 +8,7 @@ import play.api.Play.current
 
 case class Account(id: Option[Long] = None, email: String, password: String){
   def encryptPassword = password.bcrypt
-  def passwordMatches(pwd: String) = {
-    println(pwd + "->" + pwd.bcrypt)
-    pwd.isBcrypted(password)
-  }
+  def passwordMatches(pwd: String) = pwd.isBcrypted(password)
 }
 
 class Accounts {

@@ -18,15 +18,13 @@ class GoodReadsSpec extends Specification {
     "http://www.goodreads.com/oauth/authorize", KEY),
     true)
 
-  "Goodreads OAuth" should {
+  "GoodReads OAuth" should {
     "return request token" in {
       GoodReadsOAuth.retrieveRequestToken("http://localhost:9000/goodreadsaccept") match {
         case Right(t) => t.token must not be null
         case Left(e) => throw e
       }
     }
-
-    
   }
 }
 
