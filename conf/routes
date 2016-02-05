@@ -10,5 +10,7 @@ POST    /account/create             controllers.Account.createPost
 GET     /account/login              controllers.Account.login
 POST    /account/login              controllers.Account.loginPost
 
+GET     /auth/goodreads             controllers.GoodReads.auth
+
 # Map static resources from the /public folder to the /assets URL path
 GET     /assets/*file               controllers.Assets.versioned(path="/public", file: Asset)
