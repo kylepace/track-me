@@ -33,12 +33,22 @@ class Accounts {
     }
   }
 
-  def find(email: String): Option[Account] = {
+  def find(email: String) = {
     DB.withConnection { implicit c =>
       val account = SQL"SELECT TOP 1 * FROM Account WHERE email = $email"
         .as(accountParser *)
 
-      if (account.size > 0) Some(account(0))
+      if (account.nonEmpty) Some(account(0))
+      else None
+    }
+  }
+
+  def find(id: Long) = {
+    DB.withConnection { implicit c =>
+      val account = SQL"SELECT TOP 1 * FROM Account WHERE id = $id"
+        .as(accountParser *)
+
+      if (account.nonEmpty) Some(account(0))
       else None
     }
   }

@@ -17,6 +17,7 @@ CREATE TABLE ApiAccessor (
   account_id  BIGINT(20)    NOT NULL REFERENCES Account,
   name        VARCHAR(55)   NOT NULL,
   key         VARCHAR(500)  NOT NULL,
+  secret      VARCHAR(500)  NULL,
   createdOn   TIMESTAMP     NOT NULL DEFAULT now()
 )
 
