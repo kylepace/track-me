@@ -1,6 +1,6 @@
 package models
 
-import controllers.{GoodReadsUser, ApiAuth}
+import controllers.{GoodReadsApi, ApiAuth}
 import org.junit.runner.RunWith
 import org.specs2.mutable._
 import org.specs2.runner.JUnitRunner
@@ -13,8 +13,6 @@ import scala.concurrent.duration._
 
 import scala.concurrent.ExecutionContext.Implicits.global
 
-import scala.xml.XML
-
 @RunWith(classOf[JUnitRunner])
 class GoodReadsSpec extends Specification {
 
@@ -24,20 +22,9 @@ class GoodReadsSpec extends Specification {
 
   "GoodReads current user" should {
     "return current user id" in new WithApplication {
-      val apiAuth = new ApiAuth()
-      val uri = "https://www.goodreads.com/api/auth_user"
+      val api = new GoodReadsApi(new ApiAuth())
 
-      val request = WS.url(uri).sign(OAuthCalculator(apiAuth.KEY, requestToken))
-
-      val result = Await.result(request.get, 5 seconds)
-      result.status must be equalTo(200)
-
-      // move this stuff out to a separate class
-      val xmlDoc = XML.loadString(result.body)
-      val userId = (xmlDoc \ "user").\@("id")
-      val name = (xmlDoc \ "name").text
-      val url = (xmlDoc \ "link").text
-      val goodReadsUser = GoodReadsUser(userId, name, url)
+      val goodReadsUser = Await.result(api.getCurrentUser(requestToken), 5 seconds)
 
       goodReadsUser.id must not beNull
     }

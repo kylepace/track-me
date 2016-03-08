@@ -24,7 +24,7 @@ class GoodReads @Inject() (apiAuth: ApiAuth, apiAccess: ApiAccess, accounts: Acc
     }.getOrElse(
       apiAuth.getGoodReadsRequestToken match {
         case Right(t) => {
-          // refactor this out of session, store in db, don't want in cookie
+          // make sure this gets encrypted
           Redirect(apiAuth.getGoodReadsRedirectUrl(t.token))
               .withSession("goodreads_token" -> t.token, "goodreads_secret" -> t.secret)
         }

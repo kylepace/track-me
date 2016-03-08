@@ -1,7 +1,13 @@
 package controllers
 
-import play.api.libs.oauth.{RequestToken, ServiceInfo, OAuth, ConsumerKey}
+import javax.inject.Inject
+
+import play.api.libs.oauth._
+import play.api.libs.ws.WS
 import play.api.mvc.RequestHeader
+
+import scala.concurrent.{Future}
+import scala.xml.XML
 
 class ApiAuth {
   val key = "vq5wD2sQi3iVi4uWc2uffQ"
@@ -34,3 +40,23 @@ class ApiAuth {
 }
 
 case class GoodReadsUser(id: String, name: String, url: String)
+
+class GoodReadsApi @Inject() (apiAuth: ApiAuth) {
+  import play.api.Play.current
+  import scala.concurrent.ExecutionContext.Implicits.global
+
+  def getCurrentUser(token: RequestToken): Future[GoodReadsUser] = {
+    val uri = "https://www.goodreads.com/api/auth_user"
+    val request = WS.url(uri).sign(OAuthCalculator(apiAuth.KEY, token))
+    request.get.flatMap { r => Future.successful(parseGoodReadsUser(r.body)) }
+  }
+
+  def parseGoodReadsUser(xml: String): GoodReadsUser = {
+    val xmlDoc = XML.loadString(xml)
+    GoodReadsUser(
+      (xmlDoc \ "user").\@("id"),
+      (xmlDoc \ "name").text,
+      (xmlDoc \ "link").text
+    )
+  }
+}
