@@ -15,7 +15,7 @@ class GoodReads @Inject() (apiAuth: ApiAuth, apiAccess: ApiAccess, accounts: Acc
       val tokenPair = apiAuth.goodReadsTokenPair(request).get
       apiAuth.getGoodReadsAuthToken(tokenPair, verifier) match {
         case Right(t) => {
-          val apiAccessor = apiAccess.create(loggedInAccount, GoodReads, tokenPair.token, tokenPair.secret)
+          val apiAccessor = apiAccess.create(loggedInAccount, GoodReads, t.token, t.secret)
           Ok(s"got your goodreads ${apiAccessor.get.id}")
             .withSession("goodreads_token" -> t.token, "goodreads_secret" -> t.secret)
         }

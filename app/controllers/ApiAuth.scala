@@ -32,3 +32,5 @@ class ApiAuth {
     }
   }
 }
+
+case class GoodReadsUser(id: String, name: String, url: String)
