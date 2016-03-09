@@ -4,20 +4,17 @@ import controllers.{GoodReadsApi, ApiAuth}
 import org.junit.runner.RunWith
 import org.specs2.mutable._
 import org.specs2.runner.JUnitRunner
-import play.api.libs.oauth.{RequestToken, OAuthCalculator}
-import play.api.libs.ws.WS
+import play.api.libs.oauth.{RequestToken}
 import play.api.test.WithApplication
 
 import scala.concurrent.Await
 import scala.concurrent.duration._
 
-import scala.concurrent.ExecutionContext.Implicits.global
-
 @RunWith(classOf[JUnitRunner])
 class GoodReadsSpec extends Specification {
 
-  val testTokenKey = "NVrj9NZFL6vxuHKjBLBa9Q"
-  val testTokenSecret = "UbYbiOMj6fWYuFUaMFpeC8LyFQfcWYk8MVg8x6ItgoA"
+  val testTokenKey = "8JREwkwPJkEVT4ITYwpNRA"
+  val testTokenSecret = "GdLeeyowGPcGXLfIQarxjD1hWawXclz50Gus126qNvc"
   val requestToken = RequestToken(testTokenKey, testTokenSecret)
 
   "GoodReads current user" should {
@@ -32,15 +29,12 @@ class GoodReadsSpec extends Specification {
 
   "GoodReads review list" should {
     "return list of reviews" in new WithApplication {
-      val apiAuth = new ApiAuth()
-      val reviewUri = "https://www.goodreads.com/review/list.xml?v=2&id=29274317"
-      val response =
-        Await.result(
-          WS.url(reviewUri).sign(OAuthCalculator(apiAuth.KEY, requestToken)).get,
-          5 seconds
-        )
+      val goodReadsApi = new GoodReadsApi(new ApiAuth())
 
-      response.status must be equalTo(200)
+      val books = Await.result(goodReadsApi.getBooks("52427719", requestToken), 5 seconds)
+
+      books.length must beGreaterThan(0)
+      books.head.title must not beNull
     }
   }
 }

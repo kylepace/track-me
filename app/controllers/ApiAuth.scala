@@ -6,8 +6,9 @@ import play.api.libs.oauth._
 import play.api.libs.ws.WS
 import play.api.mvc.RequestHeader
 
+import scala.collection.immutable.Seq
 import scala.concurrent.{Future}
-import scala.xml.XML
+import scala.xml.{Node, XML}
 
 class ApiAuth {
   val key = "vq5wD2sQi3iVi4uWc2uffQ"
@@ -40,6 +41,7 @@ class ApiAuth {
 }
 
 case class GoodReadsUser(id: String, name: String, url: String)
+case class GoodReadsBook(id: Int, title: String, url: String, imageUrl: String, author: String)
 
 class GoodReadsApi @Inject() (apiAuth: ApiAuth) {
   import play.api.Play.current
@@ -51,6 +53,12 @@ class GoodReadsApi @Inject() (apiAuth: ApiAuth) {
     request.get.flatMap { r => Future.successful(parseGoodReadsUser(r.body)) }
   }
 
+  def getBooks(userId: String, token: RequestToken): Future[Seq[GoodReadsBook]] = {
+    val reviewUri = s"https://www.goodreads.com/review/list.xml?v=2&id=${userId}"
+    val request = WS.url(reviewUri).sign(OAuthCalculator(apiAuth.KEY, token))
+    request.get.flatMap{ r => Future.successful(parseGoodReadsBook(r.body)) }
+  }
+
   def parseGoodReadsUser(xml: String): GoodReadsUser = {
     val xmlDoc = XML.loadString(xml)
     GoodReadsUser(
@@ -58,5 +66,21 @@ class GoodReadsApi @Inject() (apiAuth: ApiAuth) {
       (xmlDoc \ "name").text,
       (xmlDoc \ "link").text
     )
+  }
+
+  def parseGoodReadsBook(xml: String): Seq[GoodReadsBook] = {
+    val xmlDoc = XML.loadString(xml)
+    val reviewXml = (xmlDoc \ "reviews" \ "review")
+    reviewXml map parseBookFromReviewXml
+  }
+
+  def parseBookFromReviewXml(xml: Node): GoodReadsBook = {
+    val book = xml \ "book"
+    val bookId = (book \ "id").text.toInt
+    val title = (book \ "title").text
+    val url = (book \ "link").text
+    val imageUrl = (book \ "image_url").text
+    val author = ((book \ "authors" \ "author").head \ "name").text
+    GoodReadsBook(bookId, title, url, imageUrl, author)
   }
 }
